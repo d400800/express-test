@@ -1,5 +1,7 @@
+const apolloServer = require('./apollo-server');
+
 const express = require('express');
-const app = express();
+const expressServer = express();
 const assert = require("assert");
 const config = require("./config");
 const AppRoutes = require('./app-routes');
@@ -17,14 +19,18 @@ MongoClient.connect(config.dbUrl, (err, client) => {
     //client.close();
 });
 
-app.use(bodyParser.json());
+expressServer.use(bodyParser.json());
 
-app.use(function(req, res, next){
+expressServer.use(function(req, res, next){
     req.db = context.dbClient;
 
     next();
 });
 
-new AppRoutes(app);
+new AppRoutes(expressServer);
 
-app.listen(config.port, () => console.log(`Listening on port ${config.port}!`));
+expressServer.listen(config.port, () => console.log(`Listening on port ${config.port}!`));
+
+apolloServer.listen().then(({ url }) => {
+    console.log(`🚀  Server ready at ${url}`);
+});
